@@ -7,10 +7,10 @@ module.exports = function (grunt) {
     require('load-grunt-tasks')(grunt);
 
     const awsOptions = {
-        key: process.env.keyDev ? process.env.keyDev : '<%= aws.key %>',
-        secret: process.env.secretDev ? process.env.secretDev : '<%= aws.secret %>',
-        bucket: process.env.bucketDev ? process.env.bucketDev : '<%= aws.bucket %>',
-        region: process.env.regionDev ? process.env.regionDev : '<%= aws.region %>',
+        key: process.env.keydev ? process.env.keydev : '<%= aws.key %>',
+        secret: process.env.secretdev ? process.env.secretdev : '<%= aws.secret %>',
+        bucket: process.env.bucketdev ? process.env.bucketdev : '<%= aws.bucket %>',
+        region: process.env.regiondev ? process.env.regiondev : '<%= aws.region %>',
         access: 'public-read',
         headers: {
             "Content-Encoding": "gzip",
