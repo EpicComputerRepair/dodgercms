@@ -1,0 +1,35 @@
+{
+  "name": "Epic CMS",
+  "version": "0.0.1",
+  "authors": [
+    "Stephen Hineline <subasteve@gmail.com>"
+  ],
+  "description": "Website Content Management System",
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "*",
+    "font-awesome": "*",
+    "mithriljs": "*",
+    "aws-sdk": "*",
+    "choices.js": "^3.0.2",
+    "async": "^2.5.0",
+    "raven-js": "^3.17.0",
+    "lodash": "^4.17.4",
+    "raphael": "^2.2.7",
+    "flowchart": "^1.7.0",
+    "katex": "^0.8.3",
+    "js-sequence-diagrams": "^2.0.1",
+    "marked": "^0.3.6",
+    "codemirror": "^5.29.0"
+  },
+  "devDependencies": {}
+}
