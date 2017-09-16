@@ -26,6 +26,7 @@
     "katex": false,
     "Diagram": false,
     "CodeMirror": false,
-    "marked": false
+    "marked": false,
+    "Handlebars": false
   }
 }

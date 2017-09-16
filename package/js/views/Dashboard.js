@@ -88,7 +88,6 @@ var viewModel = {
     currentView: "editor",
     editor: {
         text: "",
-        originalText: "",
         key: "",
         originalKey: "",
         title: "",
@@ -113,7 +112,7 @@ var powerpointTypes = ["application/vnd.openxmlformats-officedocument.presentati
 var calendarTypes = ["text/calendar"];
 
 function renameTemplate(key, callback) {
-    if(key !== viewModel.editor.originalKey){
+    if(key !== viewModel.editor.originalKey && viewModel.editor.originalKey !== "templates/"){
         // The slug needs to be between 1 and 32 characters
         if (!/^([a-zA-Z0-9-_]){1,32}$/.test(key.substring(key.lastIndexOf("/")+1))) {
             callback(true,'The url slug must be at most 32 characters, and can only contain letters, numbers, dashes, underscores.');
@@ -140,12 +139,12 @@ function renameTemplate(key, callback) {
 }
 
 function save(key,callback) {
-    if(viewModel.editor.text !== viewModel.editor.originalText){
+    if(viewModel.editor.text !== Editor.getText()){
         // Create the new key in s3
         let params = {
             Bucket: localStorage.getItem('epiccms-data-bucket'),
             Key: key,
-            Body: viewModel.editor.text,
+            Body: Editor.getText(),
             ContentEncoding: 'utf-8',
             ContentType:  viewModel.currentView === "editor" ? CONTENT_TYPE : TEMPLATE_TYPE,
             Expires: 0,
@@ -267,7 +266,6 @@ function loadTemplate(view,text,path,title){
     viewModel.currentView = view;
     viewModel.editor.visible = true;
     viewModel.editor.text = text;
-    viewModel.editor.originalText = text;
     viewModel.editor.key = path;
     viewModel.editor.originalKey = path;
     viewModel.editor.title = title;
@@ -284,8 +282,10 @@ module.exports = {
         if(viewModel.siteFiles === null) {
             getDir(function (error, data) {
                 if (!error) {
-                    viewModel.siteFiles = data;
-                    viewModel.templateFiles = viewModel.siteFiles.map(function (element){
+                    viewModel.siteFiles = data.filter(function (value) {
+                        return value.Key.indexOf("templates/") <= -1;
+                    });
+                    viewModel.templateFiles = data.map(function (element){
                         if(!element.folder) {
 
                             var path = element.Key.replace(/\/\s*$/, '');
@@ -483,8 +483,10 @@ module.exports = {
                                             });
                                         }else if(viewModel.currentView === "template"){
                                             renameTemplate(newKey, function (needed, error/*, data*/) {
+                                                console.log("renameTemplate",needed,error);
                                                 if (!needed || !error) {
                                                     save(newKey, function (needed, error/*, data*/) {
+                                                        console.log("save",needed,error);
                                                         if (!needed || !error) {
 
                                                         }else if(error){
@@ -502,7 +504,7 @@ module.exports = {
                                     ])
                                 ])
                             ),
-                            m(Editor, {visible: context.visible})
+                            m(Editor)
                         ] : [""]
                     )
                 ]

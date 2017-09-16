@@ -33,12 +33,24 @@ function getCodeMirror(element,newText){
     return codeMirror;
 }
 
+Handlebars.registerHelper('selected', function(option, value) {
+    return (option === value) ? ' selected="selected"' : '';
+});
+
+// Helper to prevent blocks of template code from getting rendered
+Handlebars.registerHelper('raw-helper', function(options) {
+    return options.fn();
+});
+
 module.exports = {
     setText: function (newText) {
         text = newText;
         if(codeMirror !== null) {
             codeMirror.setValue(text);
         }
+    },
+    getText: function () {
+        return text;
     },
     setMode: function (newMode) {
         mode = newMode;
@@ -57,16 +69,13 @@ module.exports = {
         if(vnode.attrs.mode){
             this.setMode(vnode.attrs.mode);
         }
-        if(vnode.attrs.visible) {
-            return [
-                m("div", {
-                    id: "codeView", oncreate: function () {
-                        getCodeMirror(document.getElementById("codeView"), viewText);
-                    }
-                }),
-                m("div", m.trust(mode === "gfm" ? marked(viewText) : viewText))
-            ];
-        }
-        return "";
+        return [
+            m("div", {
+                id: "codeView", oncreate: function () {
+                    getCodeMirror(document.getElementById("codeView"), viewText);
+                }
+            }),
+            m("div", mode === "gfm" ? m.trust(marked(viewText)) : m("iframe", {style: {width: "100%", border: "none"}, src: "data:text/html;charset=utf-8," + encodeURI(Handlebars.compile(viewText)())}))
+        ];
     }
 };

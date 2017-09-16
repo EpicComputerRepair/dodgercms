@@ -29,7 +29,8 @@
     "katex": "^0.8.3",
     "js-sequence-diagrams": "^2.0.1",
     "marked": "^0.3.6",
-    "codemirror": "^5.29.0"
+    "codemirror": "^5.29.0",
+    "handlebars": "^4.0.10"
   },
   "devDependencies": {}
 }

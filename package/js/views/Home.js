@@ -342,7 +342,7 @@ module.exports = {
     view: function() {
         return [
             m("div", {class: "well"}, [
-                m(Editor, {visible: true, text: sampleText, mode: "gfm"}),
+                m(Editor, {text: sampleText, mode: "gfm"}),
                 m("h3", "Flowchart support"),
                 m("p", m("i","TODO implement into markdown")),
                 m("div", {id: "diagram", oncreate: function (){

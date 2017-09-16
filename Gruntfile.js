@@ -305,9 +305,12 @@ module.exports = function (grunt) {
                     {expand: true, cwd: 'bower_components/codemirror/mode/xml', src: ['xml.js'], dest: 'bowerBuild/js/base'},
                     {expand: true, cwd: 'bower_components/codemirror/mode/javascript', src: ['javascript.js'], dest: 'bowerBuild/js/base'},
                     {expand: true, cwd: 'bower_components/codemirror/mode/css', src: ['css.js'], dest: 'bowerBuild/js/base'},
-                    {expand: true, cwd: 'bower_components/codemirror/addon/mode', src: ['overlay.js'], dest: 'bowerBuild/js/base'},
+                    {expand: true, cwd: 'bower_components/codemirror/addon/mode', src: ['overlay.js','simple.js','multiplex.js'], dest: 'bowerBuild/js/base'},
                     {expand: true, cwd: 'bower_components/codemirror/mode/gfm', src: ['gfm.js'], dest: 'bowerBuild/js'},
+                    {expand: true, cwd: 'bowerBuild/js', src: ['handlebars.js'], dest: 'bowerBuild/js/base'},
+                    {expand: true, cwd: 'bower_components/codemirror/mode/handlebars', src: ['handlebars.js'], dest: 'bowerBuild/js'},
                     {expand: true, cwd: 'bower_components/codemirror/mode/htmlmixed', src: ['htmlmixed.js'], dest: 'bowerBuild/js'},
+                    {expand: true, cwd: 'bower_components/handlebars', src: ['handlebars.runtime.js'], dest: 'bowerBuild/js/base/base'},
                     {
                         expand: true,
                         cwd: 'bower_components/bootstrap/less/',
