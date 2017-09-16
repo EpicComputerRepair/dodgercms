@@ -1,6 +1,6 @@
 Epic CMS Dev
 ========================================
-[![CircleCI](https://circleci.com/bb/subasteve/epic-cms/tree/master.svg?style=svg&circle-token=167a6cb3762ffc83f04a44ba46712f49ea859f55)](https://circleci.com/bb/subasteve/epic-cms/tree/master) [![Grunt](https://cdn.rawgit.com/aleen42/badges/master/src/grunt.svg)](http://gruntjs.com/) [![Bower](https://cdn.rawgit.com/aleen42/badges/master/src/bower.svg)](https://bower.io/) [![Webpack](https://cdn.rawgit.com/aleen42/badges/master/src/webpack.svg)](https://webpack.js.org/)  
+[![CircleCI](https://circleci.com/gh/EpicComputerRepair/epiccms/tree/dev.svg?style=svg)](https://circleci.com/gh/EpicComputerRepair/epiccms/tree/dev) [![Grunt](https://cdn.rawgit.com/aleen42/badges/master/src/grunt.svg)](http://gruntjs.com/) [![Bower](https://cdn.rawgit.com/aleen42/badges/master/src/bower.svg)](https://bower.io/) [![Webpack](https://cdn.rawgit.com/aleen42/badges/master/src/webpack.svg)](https://webpack.js.org/)
 ![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)  
 
 Static website generation from markdown built for [Amazon S3](https://aws.amazon.com/s3/). Forked originally from the project [dodgercms](https://github.com/ChrisZieba/dodgercms).
