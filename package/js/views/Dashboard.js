@@ -483,10 +483,8 @@ module.exports = {
                                             });
                                         }else if(viewModel.currentView === "template"){
                                             renameTemplate(newKey, function (needed, error/*, data*/) {
-                                                console.log("renameTemplate",needed,error);
                                                 if (!needed || !error) {
                                                     save(newKey, function (needed, error/*, data*/) {
-                                                        console.log("save",needed,error);
                                                         if (!needed || !error) {
 
                                                         }else if(error){

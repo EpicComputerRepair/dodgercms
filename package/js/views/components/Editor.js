@@ -75,7 +75,15 @@ module.exports = {
                     getCodeMirror(document.getElementById("codeView"), viewText);
                 }
             }),
-            m("div", mode === "gfm" ? m.trust(marked(viewText)) : m("iframe", {style: {width: "100%", border: "none"}, src: "data:text/html;charset=utf-8," + encodeURI(Handlebars.compile(viewText)())}))
+            m("div", mode !== "gfm" ? {style: {height: "800px"}} : {}, mode === "gfm" ? m.trust(marked(viewText)) : m("iframe", {style: {width: "100%", height: "100%", border: "none"}, src: "data:text/html;charset=utf-8," + encodeURI(Handlebars.compile(viewText)({
+                key: "Key",
+                title: "Title Here",
+                modified: new Date().toLocaleString(),
+                body: "Content Here",
+                bucket: localStorage.getItem('epiccms-site-bucket'),
+                endpoint: localStorage.getItem('epiccms-site-endpoint'),
+                dataKey: '.epiccms/data.json'
+            }))}))
         ];
     }
 };
