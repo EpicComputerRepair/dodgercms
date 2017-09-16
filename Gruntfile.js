@@ -302,8 +302,12 @@ module.exports = function (grunt) {
                     {expand: true, cwd: 'bower_components/js-sequence-diagrams/dist', src: ['sequence-diagram-snap.js'], dest: 'bowerBuild/js/'},
                     {expand: true, cwd: 'bower_components/codemirror/theme', src: ['mdn-like.css'], dest: 'bowerBuild/css/'},
                     {expand: true, cwd: 'bower_components/codemirror/mode/markdown', src: ['markdown.js'], dest: 'bowerBuild/js/base'},
+                    {expand: true, cwd: 'bower_components/codemirror/mode/xml', src: ['xml.js'], dest: 'bowerBuild/js/base'},
+                    {expand: true, cwd: 'bower_components/codemirror/mode/javascript', src: ['javascript.js'], dest: 'bowerBuild/js/base'},
+                    {expand: true, cwd: 'bower_components/codemirror/mode/css', src: ['css.js'], dest: 'bowerBuild/js/base'},
                     {expand: true, cwd: 'bower_components/codemirror/addon/mode', src: ['overlay.js'], dest: 'bowerBuild/js/base'},
                     {expand: true, cwd: 'bower_components/codemirror/mode/gfm', src: ['gfm.js'], dest: 'bowerBuild/js'},
+                    {expand: true, cwd: 'bower_components/codemirror/mode/htmlmixed', src: ['htmlmixed.js'], dest: 'bowerBuild/js'},
                     {
                         expand: true,
                         cwd: 'bower_components/bootstrap/less/',

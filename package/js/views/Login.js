@@ -213,7 +213,8 @@ self.createLoginPanelView = function createLoginPanelView(vnode) {
                 }})
             ),
             m("div", { class: "col-xs-3" },
-                m("button", { class: "btn btn-success", onclick: vnode.viewModel.login, disabled: vnode.viewModel.loggingIn }, m("i", {class: "fa fa-user"}), " Sign In")
+                !vnode.viewModel.loggingIn ? m("button", { class: "btn btn-success", onclick: vnode.viewModel.login, disabled: vnode.viewModel.loggingIn }, m("i", {class: "fa fa-fw fa-user"}), " Sign In") :
+                    m("i", {class: "fa fa-refresh fa-fw fa-spin"})
             ),
             m(Checkbox, {
                 checkboxes: [

@@ -92,24 +92,12 @@ var viewModel = {
         key: "",
         originalKey: "",
         title: "",
+        visible: false,
         setTitle: function (text) {
             viewModel.editor.title = text;
         },
         setKey: function (text) {
             viewModel.editor.key = text;
-        }
-    },
-    template: {
-        text: "",
-        originalText: "",
-        key: "",
-        originalKey: "",
-        title: "",
-        setTitle: function (text) {
-            viewModel.template.title = text;
-        },
-        setKey: function (text) {
-            viewModel.template.key = text;
         }
     },
     siteFiles: null,
@@ -124,36 +112,8 @@ var publisherTypes = ['application/x-mspublisher'];
 var powerpointTypes = ["application/vnd.openxmlformats-officedocument.presentationml.presentation","application/vnd.ms-powerpoint"];
 var calendarTypes = ["text/calendar"];
 
-function saveTemplate(key, callback) {
-    if(viewModel.template.text !== viewModel.editor.originalText){
-        // Create the new key in s3
-        var params = {
-            Bucket: localStorage.getItem('epiccms-data-bucket'),
-            Key: key,
-            Body: viewModel.template.text,
-            ContentEncoding: 'utf-8',
-            ContentType:  TEMPLATE_TYPE,
-            Expires: 0,
-            CacheControl: 'public, max-age=0, no-cache',
-            Metadata: {
-                'title': viewModel.template.title
-            }
-        };
-
-        S3.putObject(params, function(err, data) {
-            if (err) {
-                callback(true,err);
-            } else {
-                callback(true,null,data);
-            }
-        });
-    }else{
-        callback(false);
-    }
-}
-
 function renameTemplate(key, callback) {
-    if(key !== viewModel.template.originalKey){
+    if(key !== viewModel.editor.originalKey){
         // The slug needs to be between 1 and 32 characters
         if (!/^([a-zA-Z0-9-_]){1,32}$/.test(key.substring(key.lastIndexOf("/")+1))) {
             callback(true,'The url slug must be at most 32 characters, and can only contain letters, numbers, dashes, underscores.');
@@ -161,7 +121,7 @@ function renameTemplate(key, callback) {
 
         let dataBucket = localStorage.getItem('epiccms-data-bucket');
 
-        S3.renameObjects(viewModel.template.originalKey, key, dataBucket, function(err, data1) {
+        S3.renameObjects(viewModel.editor.originalKey, key, dataBucket, function(err, data1) {
             if (err) {
                 callback(true,err);
             } else {
@@ -179,15 +139,15 @@ function renameTemplate(key, callback) {
     }
 }
 
-function saveDoc(key,callback) {
+function save(key,callback) {
     if(viewModel.editor.text !== viewModel.editor.originalText){
         // Create the new key in s3
-        var params = {
+        let params = {
             Bucket: localStorage.getItem('epiccms-data-bucket'),
             Key: key,
             Body: viewModel.editor.text,
             ContentEncoding: 'utf-8',
-            ContentType:  CONTENT_TYPE,
+            ContentType:  viewModel.currentView === "editor" ? CONTENT_TYPE : TEMPLATE_TYPE,
             Expires: 0,
             CacheControl: 'public, max-age=0, no-cache',
             Metadata: {
@@ -303,6 +263,19 @@ function filesAndFolders(data) {
     return foldersAndFiles;
 }
 
+function loadTemplate(view,text,path,title){
+    viewModel.currentView = view;
+    viewModel.editor.visible = true;
+    viewModel.editor.text = text;
+    viewModel.editor.originalText = text;
+    viewModel.editor.key = path;
+    viewModel.editor.originalKey = path;
+    viewModel.editor.title = title;
+    Editor.setMode(view === "template" ? "htmlmixed" : "gfm");
+    Editor.setText(text);
+    m.redraw();
+}
+
 
 module.exports = {
     view: function() {
@@ -342,16 +315,13 @@ module.exports = {
                 }
             });
         }
-        let context = null;
-        if(viewModel.currentView === "editor"){
-            context = viewModel.editor;
-        }else if(viewModel.currentView === "template"){
-            context = viewModel.template;
-        }
+        let context = viewModel.editor;
         return m(View, {
                 sidebar: [
                     m(UserPanel),
-                    m("h4", "Templates"),
+                    m("h4", "Templates", m("i", {class: "fa fa-fw fa-plus text-success", style: {cursor: "pointer"}, onclick: function () {
+                        loadTemplate("template","","templates/","");
+                    }})),
                     m("hr"),
                     viewModel.templateFiles && viewModel.templateFiles.length > 0 ? m("div", {id: "templateTree", oncreate: function (){
 
@@ -360,21 +330,15 @@ module.exports = {
                         });
 
                         tree.on('node.selected', function (node) {
-                            console.log("Selected Node", node);
+                            //console.log("Selected Node", node);
                             S3.getObject(node.path, localStorage.getItem('epiccms-data-bucket'), function (err, data) {
                                 if (!err && data) {
-                                    console.log(err, data);
-                                    viewModel.template.text = data.Body.toString();
-                                    viewModel.template.originalText = viewModel.editor.text;
-                                    viewModel.template.key = node.path;
-                                    viewModel.template.originalKey = node.path;
-                                    viewModel.template.title = "";
-                                    viewModel.currentView = "template";
+                                    //console.log(err, data);
+                                    let title = "";
                                     if (data.Metadata && data.Metadata.title) {
-                                        viewModel.template.title = data.Metadata.title;
+                                        title = data.Metadata.title;
                                     }
-                                    Editor.setText(viewModel.template.text);
-                                    m.redraw();
+                                    loadTemplate("template",data.Body.toString(),node.path,title);
                                 }
                             });
                         });
@@ -383,7 +347,9 @@ module.exports = {
                             target: '#templateTree'
                         });
                     }}) : (!viewModel.templateFiles ? m("i", { class: "fa fa-refresh fa-spin fa-fw" }) : m("span", m("i", { class: "fa fa-file-code-o fa-fw" }), "No templates created")),
-                    m("h4", "Site"),
+                    m("h4", "Site", m("i", {class: "fa fa-fw fa-plus text-success", style: {cursor: "pointer"}, onclick: function () {
+                        loadTemplate("editor","","","");
+                    }})),
                     m("hr"),
                     viewModel.siteFiles ? m("div", {id: "treeDiv", oncreate: function (){
                         let tree = new InspireTree({
@@ -391,20 +357,15 @@ module.exports = {
                         });
 
                         tree.on('node.selected', function (node) {
-                            console.log("Selected Node", node);
+                            //console.log("Selected Node", node);
                             S3.getObject(node.path, localStorage.getItem('epiccms-data-bucket'), function (err, data) {
                                 if (!err && data) {
-                                    console.log(err, data);
-                                    viewModel.editor.text = data.Body.toString();
-                                    viewModel.editor.originalText = viewModel.editor.text;
-                                    viewModel.editor.key = node.path;
-                                    viewModel.editor.originalKey = node.path;
-                                    viewModel.editor.title = "";
-                                    viewModel.currentView = "editor";
+                                    //console.log(err, data);
+                                    let title = "";
                                     if (data.Metadata && data.Metadata.title) {
-                                        viewModel.editor.title = data.Metadata.title;
+                                        title = data.Metadata.title;
                                     }
-                                    Editor.setText(viewModel.editor.text);
+                                    loadTemplate("editor",data.Body.toString(),node.path,title);
                                     m.redraw();
                                 }
                             });
@@ -417,7 +378,7 @@ module.exports = {
                 ],
                 main: [
                     m("div", {class: "well"},
-                        context && context.text ? [
+                        context && context.text !== undefined && context.visible ? [
                             m("div", {class: "row"},
                                 m("div", { class: "col-xs-12 col-sm-6" }, [
                                     m("div", { class: "form-group" }, [
@@ -435,7 +396,7 @@ module.exports = {
                                             m("span", { class: "input-group-addon" }, [
                                                 m("i", { class: "fa fa-folder-open fa-fw", style: { width: "14px" } })
                                             ]),
-                                            m("input", { class: "form-control", type: "text", placeholder: "Title", value: context.key, onchange: m.withAttr("value", context.setKey) })
+                                            m("input", { class: "form-control", type: "text", placeholder: "Path", value: context.key, onchange: m.withAttr("value", context.setKey) })
                                         ])
                                     ])
                                 ])
@@ -484,7 +445,7 @@ module.exports = {
                                                     if (err) {
                                                         console.error(err);
                                                     } else {
-                                                        console.log(data);
+                                                        //console.log(data);
                                                         Editor.setTextAtMouse((image ? '!' : '') + '[' + file.name + ']' + '(' + link + ')  ');
                                                     }
                                                 });
@@ -509,7 +470,7 @@ module.exports = {
                                         if(viewModel.currentView === "editor") {
                                             renameDoc(newKey, function (needed, error/*, data*/) {
                                                 if (!needed || !error) {
-                                                    saveDoc(newKey, function (needed, error/*, data*/) {
+                                                    save(newKey, function (needed, error/*, data*/) {
                                                         if (!needed || !error) {
 
                                                         }else if(error){
@@ -523,7 +484,7 @@ module.exports = {
                                         }else if(viewModel.currentView === "template"){
                                             renameTemplate(newKey, function (needed, error/*, data*/) {
                                                 if (!needed || !error) {
-                                                    saveTemplate(newKey, function (needed, error/*, data*/) {
+                                                    save(newKey, function (needed, error/*, data*/) {
                                                         if (!needed || !error) {
 
                                                         }else if(error){
@@ -541,7 +502,7 @@ module.exports = {
                                     ])
                                 ])
                             ),
-                            m(Editor)
+                            m(Editor, {visible: context.visible})
                         ] : [""]
                     )
                 ]
