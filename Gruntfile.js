@@ -7,8 +7,8 @@ module.exports = function (grunt) {
     require('load-grunt-tasks')(grunt);
 
     const awsOptions = {
-        key: process.env.keydev ? process.env.keydev : '<%= aws.key %>',
-        secret: process.env.secretdev ? process.env.secretdev : '<%= aws.secret %>',
+        accessKeyId: process.env.keydev ? process.env.keydev : '<%= aws.key %>',
+        secretAccessKey: process.env.secretdev ? process.env.secretdev : '<%= aws.secret %>',
         bucket: process.env.bucketdev ? process.env.bucketdev : '<%= aws.bucket %>',
         region: process.env.regiondev ? process.env.regiondev : '<%= aws.region %>',
         access: 'public-read',
@@ -106,7 +106,7 @@ module.exports = function (grunt) {
                 }
             }
         },
-        s3: {
+        aws_s3: {
             options: awsOptions,
             dev: {
                 // These options override the defaults
@@ -114,7 +114,7 @@ module.exports = function (grunt) {
                     maxOperations: 20
                 },
                 // Files to be uploaded.
-                upload: [
+                files: [
                     {
                         src: 'dist/js/depends.js',
                         dest: 'js/depends.js'
@@ -154,7 +154,7 @@ module.exports = function (grunt) {
                     maxOperations: 20
                 },
                 // Files to be uploaded.
-                upload: [
+                files: [
                     {
                         src: 'dist/js/depends.js',
                         dest: 'js/depends.js'
@@ -167,7 +167,7 @@ module.exports = function (grunt) {
                     maxOperations: 20
                 },
                 // Files to be uploaded.
-                upload: [
+                files: [
                     {
                         src: 'dist/js/index.js',
                         dest: 'js/index.js'
@@ -180,7 +180,7 @@ module.exports = function (grunt) {
                     maxOperations: 20
                 },
                 // Files to be uploaded.
-                upload: [
+                files: [
                     {
                         src: 'dist/css/index.css',
                         dest: 'css/index.css'
@@ -193,7 +193,7 @@ module.exports = function (grunt) {
                     maxOperations: 20
                 },
                 // Files to be uploaded.
-                upload: [
+                files: [
                     {
                         src: 'dist/index.html',
                         dest: 'index.html'
@@ -209,7 +209,7 @@ module.exports = function (grunt) {
                     maxOperations: 20
                 },
                 // Files to be uploaded.
-                upload: [
+                files: [
                     {
                         src: 'dist/robots.txt',
                         dest: 'robots.txt'
@@ -222,7 +222,7 @@ module.exports = function (grunt) {
                     maxOperations: 20
                 },
                 // Files to be uploaded.
-                upload: [
+                files: [
                     {
                         src: 'dist/favicon.png',
                         dest: 'favicon.png'
@@ -812,18 +812,18 @@ module.exports = function (grunt) {
     grunt.registerTask('bowerSetup', ['mkdir', 'bower', 'copy:main', 'concat:choices', 'concat:katex', 'concat:snap', 'concat:fontloader', 'concat:codeMirror', 'clean:bowerBuildUnneeded', 'copy:mithril', 'replace:fontAwesomeInline', 'replace:bootstrapInline', 'replace:choicesInline', 'replace:katexInline', 'replace:bootstrap1', 'replace:bootstrap2', 'replace:bootstrap3', 'replace:bootstrap4', 'rename:fixDep']);
     grunt.registerTask('bowerBuild', ['bowerSetup','bowerFlattenCompress']);
     grunt.registerTask('bowerFlattenCompress', ['clean:dev', 'uglify:depends', 'compress']);
-    grunt.registerTask('bowerDeploy', ['s3:depends']);
+    grunt.registerTask('bowerDeploy', ['aws_s3:depends']);
     grunt.registerTask('bowerBuildDeploy', ['bowerBuild', 'bowerDeploy']);
 
     grunt.registerTask('cleanHtml', ['clean:dev']);
     grunt.registerTask("buildHtmlDebug", ['concat:debug']);
     grunt.registerTask('buildHtml', ['htmlmin:dev']);
-    grunt.registerTask('deployHtml', ['s3:html']);
+    grunt.registerTask('deployHtml', ['aws_s3:html']);
     grunt.registerTask('buildDeployHtml', ['cleanHtml', 'buildHtml', 'deployHtml', 'compress']);
     grunt.registerTask("buildDeployHtmlDebug", ['cleanHtml', 'buildHtmlDebug', 'deployHtml', 'compress']);
 
     grunt.registerTask('buildRobots', ['clean:dev', 'copy:robots', 'compress']);
-    grunt.registerTask('deployRobots', ['s3:robots']);
+    grunt.registerTask('deployRobots', ['aws_s3:robots']);
     grunt.registerTask('buildDeployRobots', ['buildRobots', 'deployRobots']);
 
     grunt.registerTask('buildImg', ['imagemin']);
@@ -831,26 +831,26 @@ module.exports = function (grunt) {
     grunt.registerTask('buildImages', ['base64Less:img','base64Less:icons']);
 
     grunt.registerTask('buildIcon', ['clean:dev', 'copy:icon', 'compress']);
-    grunt.registerTask('deployIcon', ['s3:icon']);
+    grunt.registerTask('deployIcon', ['aws_s3:icon']);
     grunt.registerTask('buildDeployIcon', ['buildIcon', 'deployIcon']);
 
     grunt.registerTask('cleanLess', ['clean:dev']);
     grunt.registerTask('buildLessDebug', ['buildFonts', 'buildImages', 'less', 'concat:css', 'cssmin:dev']);
     grunt.registerTask('buildLess', ['buildLessDebug', 'cssmin:target']);
-    grunt.registerTask('deployLess', ['s3:css']);
+    grunt.registerTask('deployLess', ['aws_s3:css']);
     grunt.registerTask('buildDeployLess', ['cleanLess', 'buildLess', 'compress', 'deployLess']);
 
     grunt.registerTask('cleanDebugJS', ['clean:dev']);
     grunt.registerTask('buildDebugJS', ['webpack:build']);
     grunt.registerTask('buildJS', ['webpack:prod']);
-    grunt.registerTask('deployJS', ['s3:js']);
+    grunt.registerTask('deployJS', ['aws_s3:js']);
     grunt.registerTask('cleanJS', ['clean:dev']);
     grunt.registerTask('buildDeployJS', ['cleanJS', 'buildJS', 'compress', 'deployJS']);
 
     grunt.registerTask('build', ['local', 'copy:robots', 'copy:icon', 'compress']);
     grunt.registerTask('buildProd', ['bowerBuild', 'buildLess', 'buildHtml', 'buildJS', 'copy:robots', 'copy:icon', 'compress']);
     grunt.registerTask('git', ['clean:git']);
-    grunt.registerTask('deployDev', ['build', 's3:dev']);
-    grunt.registerTask('deployProd', ['buildProd', 's3:dev']);
+    grunt.registerTask('deployDev', ['build', 'aws_s3:dev']);
+    grunt.registerTask('deployProd', ['buildProd', 'aws_s3:dev']);
 };
 
