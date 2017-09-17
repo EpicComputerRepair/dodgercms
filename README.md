@@ -4,7 +4,7 @@ Epic CMS Dev
 ![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103) [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)  
 
 Static website generation from markdown built for [Amazon S3](https://aws.amazon.com/s3/). Forked originally from the project [dodgercms](https://github.com/ChrisZieba/dodgercms).  
-This repo is deployed to [cms-dev.epic-computer-repair.com](https://cms-dev.epic-computer-repair.com)
+This branch is deployed to [cms-dev.epic-computer-repair.com](https://cms-dev.epic-computer-repair.com)
 
 Epic CMS is a clean and simple alternative to heavy content management systems. There are no databases to manage, deployments to monitor, or massive configuration files. Just focus on writing your content and the results are live immediately.
 
@@ -73,3 +73,8 @@ Updating Local JS Changes
 Unit Tests
 -------------
 `npm test`
+
+
+## Release History
+0.1.0: Initial release - [epiccms](https://github.com/EpicComputerRepair/epiccms) Feature parity with 0.0.1
+0.0.1: Initial release - [dodgercms](https://github.com/ChrisZieba/dodgercms)

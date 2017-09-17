@@ -12,11 +12,10 @@ module.exports = function (grunt) {
         bucket: process.env.bucketdev ? process.env.bucketdev : '<%= aws.bucket %>',
         region: process.env.regiondev ? process.env.regiondev : '<%= aws.region %>',
         access: 'public-read',
-        headers: {
-            "Content-Encoding": "gzip",
-            // 1Hr
-            "Cache-Control": "max-age=3600, must-revalidate",
-            "Expires": new Date(Date.now() + 3600).toUTCString()
+        params:{
+            ContentEncoding: "gzip",
+            CacheControl: "max-age=3600, must-revalidate",
+            Expires: new Date(Date.now() + 3600).toUTCString()
         }
     };
 
