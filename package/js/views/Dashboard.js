@@ -91,6 +91,8 @@ var viewModel = {
         key: "",
         originalKey: "",
         title: "",
+        selectedTemplate: "",
+        templates: null,
         visible: false,
         setTitle: function (text) {
             viewModel.editor.title = text;
@@ -150,9 +152,23 @@ function save(key,callback) {
             Expires: 0,
             CacheControl: 'public, max-age=0, no-cache',
             Metadata: {
-                'title': viewModel.editor.title
+                title: viewModel.editor.title
             }
         };
+
+        if(viewModel.currentView === "editor") {
+
+            if(viewModel.editor.templates && viewModel.editor.templates.currentState) {
+                viewModel.editor.selectedTemplate = viewModel.editor.templates.currentState.items[viewModel.editor.templates.currentState.items.length - 1];
+            }
+
+            if (viewModel.editor.selectedTemplate !== "") {
+                params.Metadata.template = viewModel.editor.selectedTemplate.value;
+            } else {
+                console.error("Select Template");
+                return;
+            }
+        }
 
         S3.putObject(params, function(err, data) {
             if (err) {
@@ -262,13 +278,14 @@ function filesAndFolders(data) {
     return foldersAndFiles;
 }
 
-function loadTemplate(view,text,path,title){
+function loadTemplate(view,text,path,title,template){
     viewModel.currentView = view;
     viewModel.editor.visible = true;
     viewModel.editor.text = text;
     viewModel.editor.key = path;
     viewModel.editor.originalKey = path;
     viewModel.editor.title = title;
+    viewModel.editor.selectedTemplate = template;
     Editor.setMode(view === "template" ? "htmlmixed" : "gfm");
     Editor.setText(text);
     m.redraw();
@@ -361,11 +378,16 @@ module.exports = {
                             S3.getObject(node.path, localStorage.getItem('epiccms-data-bucket'), function (err, data) {
                                 if (!err && data) {
                                     //console.log(err, data);
-                                    let title = "";
-                                    if (data.Metadata && data.Metadata.title) {
-                                        title = data.Metadata.title;
+                                    let title = "", template = "";
+                                    if (data.Metadata) {
+                                        if(data.Metadata.title) {
+                                            title = data.Metadata.title;
+                                        }
+                                        if(data.Metadata.template){
+                                            template = data.Metadata.template;
+                                        }
                                     }
-                                    loadTemplate("editor",data.Body.toString(),node.path,title);
+                                    loadTemplate("editor",data.Body.toString(),node.path,title,template);
                                     m.redraw();
                                 }
                             });
@@ -401,6 +423,30 @@ module.exports = {
                                     ])
                                 ])
                             ),
+                            viewModel.currentView === "editor" ? m("div", {class: "row"},
+                                m("div", { class: "col-xs-12", style:{marginBottom: "10px", zIndex: "9999"} },
+                                    m("div", { class: "form-group" }, [
+                                        m("div", { class: "input-group" }, [
+                                            m("span", { class: "input-group-addon" }, [
+                                                m("i", { class: "fa fa-file-code-o fa-fw", style: { width: "14px" } })
+                                            ]),
+                                            m("select", {id: "templates", oncreate: function () {
+                                                let element = document.getElementById('templates');
+                                                context.templates = new Choices(element, {
+                                                    maxItemCount: 1,
+                                                    choices: viewModel.templateFiles.map(function (file) {
+                                                        return {
+                                                            value: file.path,
+                                                            label: file.text,
+                                                            selected: file.path === context.selectedTemplate
+                                                        };
+                                                    })
+                                                });
+                                            }})
+                                        ])
+                                    ])
+                                )
+                            ) : "",
                             m("div",{class: "row"},
                                 m("div", { class: "col-xs-12" }, [
                                     m("input", {type: "file", id: "fileElem", multiple: true, style: "display:none", onchange: function () {
