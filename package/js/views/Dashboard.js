@@ -2,6 +2,7 @@
 
 const Editor = require("./components/Editor");
 const S3 = require("../util/S3");
+const Entry = require("../util/Entry");
 const View = require("./components/View");
 const UserPanel = require("./components/UserPanel");
 
@@ -518,7 +519,30 @@ module.exports = {
                                                 if (!needed || !error) {
                                                     save(newKey, function (needed, error/*, data*/) {
                                                         if (!needed || !error) {
+                                                            //console.log("Data saved!");
+                                                            let siteBucket = localStorage.getItem('epiccms-site-bucket');
+                                                            let siteEndpoint = localStorage.getItem('epiccms-site-endpoint');
 
+                                                            //console.log("Load Template...",context.selectedTemplate);
+                                                            S3.getObject(context.selectedTemplate.value, localStorage.getItem('epiccms-data-bucket'), function (error, data) {
+                                                                if (!error) {
+                                                                    if(data) {
+                                                                        //console.log("Template Received");
+                                                                        Entry.upsert(newKey, context.title, Editor.getText(), siteBucket, siteEndpoint, Handlebars.compile(data.Body.toString()), function (error/*, data*/) {
+                                                                            if (!error) {
+                                                                                //console.log("Generated New HTML");
+                                                                                Entry.menu(siteBucket, siteEndpoint, function () {
+                                                                                    //console.log("Generated New Menu");
+                                                                                });
+                                                                            } else {
+                                                                                console.error(error);
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                }else{
+                                                                    console.error(error);
+                                                                }
+                                                            });
                                                         }else if(error){
                                                             console.error(error);
                                                         }
@@ -532,7 +556,7 @@ module.exports = {
                                                 if (!needed || !error) {
                                                     save(newKey, function (needed, error/*, data*/) {
                                                         if (!needed || !error) {
-
+                                                            //console.log("Data saved!");
                                                         }else if(error){
                                                             console.error(error);
                                                         }

@@ -13,7 +13,7 @@ var DATA_KEY = '.epiccms/data.json';
  * @param {Function} callback Callback function
  */
 function remove(key, dataBucket, siteBucket, callback) {
-    S3.deleteObjects(key, dataBucket, function(err, data) {
+    S3.deleteObjects(key, dataBucket, function(err/*, data*/) {
         if (err) {
             callback(err);
         } else {
@@ -38,11 +38,11 @@ function remove(key, dataBucket, siteBucket, callback) {
  * @param {Function} callback Callback function
  */
 function rename(source, target, dataBucket, siteBucket, callback) {
-    S3.renameObjects(source, target, dataBucket, function(err, data) {
+    S3.renameObjects(source, target, dataBucket, function(err/*, data*/) {
         if (err) {
             callback(err);
         } else {
-            S3.renameObjects(source, target, siteBucket, function(err, data) {
+            S3.renameObjects(source, target, siteBucket, function(err/*, data*/) {
                 if (err) {
                     callback(err);
                 } else {
@@ -64,7 +64,7 @@ function rename(source, target, dataBucket, siteBucket, callback) {
  * @param {String} endpoint The endpoint for the bucket
  * @param {Function} callback Callback function
  */
-function upsert(key, title, content, bucket, endpoint, callback) {
+function upsert(key, title, content, bucket, endpoint, template, callback) {
     async.waterfall([
             function(waterfallCb) {
                 var options = {
@@ -104,8 +104,7 @@ function upsert(key, title, content, bucket, endpoint, callback) {
                     dataKey: DATA_KEY
                 };
 
-                var entry = dodgercms.templates['entry.html'];
-                var html = entry(context);
+                var html = template(context);
 
                 waterfallCb(null, html);
             },
@@ -119,11 +118,11 @@ function upsert(key, title, content, bucket, endpoint, callback) {
                     Expires: 0,
                     CacheControl: 'public, max-age=0, no-cache',
                     Metadata: {
-                        'title': title
+                        title: title
                     }
                 };
 
-                S3.upload(params, function(err, data) {
+                S3.upload(params, function(err/*, data*/) {
                     if (err) {
                         waterfallCb(err);
                     } else {
@@ -214,6 +213,15 @@ function menu(bucket, endpoint, callback) {
                     // The label defaults to the current part if no other title or folder label is added
                     var label = current;
 
+                    // Attempts to find a path segment in the current scope
+                    function findInScope(scope, find) {
+                        for (var i = 0; i < scope.length; i++) {
+                            if (scope[i].part === find) {
+                                return scope[i];
+                            }
+                        }
+                    }
+
                     // See if that segment already exists in the current scope
                     var found = findInScope(scope, current);
 
@@ -264,15 +272,6 @@ function menu(bucket, endpoint, callback) {
                     if (pathSegments.length) {
                         found.children = found.children || [];
                         buildFromSegments(found.children, found, keyParts, pathSegments, isFolder, keyLabel);
-                    }
-                }
-
-                // Attempts to find a path segment in the current scope
-                function findInScope(scope, find) {
-                    for (var i = 0; i < scope.length; i++) {
-                        if (scope[i].part === find) {
-                            return scope[i];
-                        }
                     }
                 }
 
