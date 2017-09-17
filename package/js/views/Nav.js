@@ -1,6 +1,7 @@
 'use strict';
 
 const Home = require("./Home");
+const Editor = require("./Editor");
 const View = require("./components/View");
 const UserPanel = require("./components/UserPanel");
 const LeftNavButton = require("./components/LeftNavButton");
@@ -22,7 +23,15 @@ module.exports = {
     Home: {
         view: function view(){
             Menu[0].active = true;
+            Menu[1].active = false;
             return createView(Home);
+        }
+    },
+    Editor: {
+        view: function view(){
+            Menu[0].active = false;
+            Menu[1].active = true;
+            return createView(Editor);
         }
     }
 };

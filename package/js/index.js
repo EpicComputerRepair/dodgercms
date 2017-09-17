@@ -53,6 +53,7 @@ function initRoutes() {
 
         m.route(document.body, "/", {
             "/": Nav.Home,
+            "/editor": Nav.Editor,
             "/login":Login,
             "/dashboard": {
                 onmatch: onmatch.bind(null,Dashboard)
