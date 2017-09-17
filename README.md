@@ -76,5 +76,5 @@ Unit Tests
 
 
 ## Release History
-0.1.0: Initial release - [epiccms](https://github.com/EpicComputerRepair/epiccms) Feature parity with 0.0.1
+0.1.0: Initial release - [epiccms](https://github.com/EpicComputerRepair/epiccms) - Feature parity with 0.0.1  
 0.0.1: Initial release - [dodgercms](https://github.com/ChrisZieba/dodgercms)
