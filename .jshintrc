@@ -27,6 +27,7 @@
     "Diagram": false,
     "CodeMirror": false,
     "marked": false,
-    "Handlebars": false
+    "Handlebars": false,
+    "hljs": false
   }
 }
