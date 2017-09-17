@@ -15,7 +15,7 @@ module.exports = function (grunt) {
         params:{
             ContentEncoding: "gzip",
             CacheControl: "max-age=3600, must-revalidate",
-            Expires: new Date(Date.now() + 3600).toUTCString()
+            Expires: new Date(Date.now() + 3600)
         }
     };
 
