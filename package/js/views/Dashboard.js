@@ -142,7 +142,7 @@ function renameTemplate(key, callback) {
 }
 
 function save(key,callback) {
-    if(viewModel.editor.text !== Editor.getText()){
+    if(viewModel.editor.text !== Editor.getText() || viewModel.editor.selectedTemplate === ""){
         // Create the new key in s3
         let params = {
             Bucket: localStorage.getItem('epiccms-data-bucket'),
@@ -160,11 +160,11 @@ function save(key,callback) {
         if(viewModel.currentView === "editor") {
 
             if(viewModel.editor.templates && viewModel.editor.templates.currentState) {
-                viewModel.editor.selectedTemplate = viewModel.editor.templates.currentState.items[viewModel.editor.templates.currentState.items.length - 1];
+                viewModel.editor.selectedTemplate = viewModel.editor.templates.currentState.items[viewModel.editor.templates.currentState.items.length - 1].value;
             }
 
             if (viewModel.editor.selectedTemplate !== "") {
-                params.Metadata.template = viewModel.editor.selectedTemplate.value;
+                params.Metadata.template = viewModel.editor.selectedTemplate;
             } else {
                 console.error("Select Template");
                 return;
@@ -303,6 +303,34 @@ module.exports = {
                     viewModel.siteFiles = data.filter(function (value) {
                         return value.Key.indexOf("templates/") <= -1;
                     });
+                    viewModel.siteFiles2 = filesAndFolders(viewModel.siteFiles);
+                    viewModel.siteTree = new InspireTree({
+                        data: viewModel.siteFiles2
+                    });
+
+                    viewModel.siteTree.on('node.selected', function (node) {
+                        //console.log("Selected Node", node);
+                        if(!node.children) {
+                            S3.getObject(node.path, localStorage.getItem('epiccms-data-bucket'), function (err, data) {
+                                if (!err && data) {
+                                    //console.log(err, data);
+                                    let title = "", template = "";
+                                    if (data.Metadata) {
+                                        if (data.Metadata.title) {
+                                            title = data.Metadata.title;
+                                        }
+                                        if (data.Metadata.template) {
+                                            template = data.Metadata.template;
+                                        }
+                                    }
+                                    loadTemplate("editor", data.Body.toString(), node.path, title, template);
+                                }
+                            });
+                        }else{
+                            node.expand();
+                        }
+                    });
+
                     viewModel.templateFiles = data.map(function (element){
                         if(!element.folder) {
 
@@ -327,6 +355,29 @@ module.exports = {
                     }).filter(function (value) {
                         return value !== undefined;
                     });
+
+                    viewModel.templateTree = new InspireTree({
+                        data: viewModel.templateFiles
+                    });
+
+                    viewModel.templateTree.on('node.selected', function (node) {
+                        //console.log("Selected Node", node);
+                        if(!node.children) {
+                            S3.getObject(node.path, localStorage.getItem('epiccms-data-bucket'), function (err, data) {
+                                if (!err && data) {
+                                    //console.log(err, data);
+                                    let title = "";
+                                    if (data.Metadata && data.Metadata.title) {
+                                        title = data.Metadata.title;
+                                    }
+                                    loadTemplate("template", data.Body.toString(), node.path, title);
+                                }
+                            });
+                        }else{
+                            node.expand();
+                        }
+                    });
+
                     m.redraw();
                 } else {
                     console.error(error);
@@ -342,26 +393,7 @@ module.exports = {
                     }})),
                     m("hr"),
                     viewModel.templateFiles && viewModel.templateFiles.length > 0 ? m("div", {id: "templateTree", oncreate: function (){
-
-                        let tree = new InspireTree({
-                            data: viewModel.templateFiles
-                        });
-
-                        tree.on('node.selected', function (node) {
-                            //console.log("Selected Node", node);
-                            S3.getObject(node.path, localStorage.getItem('epiccms-data-bucket'), function (err, data) {
-                                if (!err && data) {
-                                    //console.log(err, data);
-                                    let title = "";
-                                    if (data.Metadata && data.Metadata.title) {
-                                        title = data.Metadata.title;
-                                    }
-                                    loadTemplate("template",data.Body.toString(),node.path,title);
-                                }
-                            });
-                        });
-
-                        new InspireTreeDOM(tree, {
+                        new InspireTreeDOM(viewModel.templateTree, {
                             target: '#templateTree'
                         });
                     }}) : (!viewModel.templateFiles ? m("i", { class: "fa fa-refresh fa-spin fa-fw" }) : m("span", m("i", { class: "fa fa-file-code-o fa-fw" }), "No templates created")),
@@ -370,31 +402,7 @@ module.exports = {
                     }})),
                     m("hr"),
                     viewModel.siteFiles ? m("div", {id: "treeDiv", oncreate: function (){
-                        let tree = new InspireTree({
-                            data: filesAndFolders(viewModel.siteFiles)
-                        });
-
-                        tree.on('node.selected', function (node) {
-                            //console.log("Selected Node", node);
-                            S3.getObject(node.path, localStorage.getItem('epiccms-data-bucket'), function (err, data) {
-                                if (!err && data) {
-                                    //console.log(err, data);
-                                    let title = "", template = "";
-                                    if (data.Metadata) {
-                                        if(data.Metadata.title) {
-                                            title = data.Metadata.title;
-                                        }
-                                        if(data.Metadata.template){
-                                            template = data.Metadata.template;
-                                        }
-                                    }
-                                    loadTemplate("editor",data.Body.toString(),node.path,title,template);
-                                    m.redraw();
-                                }
-                            });
-                        });
-
-                        new InspireTreeDOM(tree, {
+                        new InspireTreeDOM(viewModel.siteTree, {
                             target: '#treeDiv'
                         });
                     }}) :  m("i", { class: "fa fa-refresh fa-spin fa-fw" })
@@ -524,7 +532,7 @@ module.exports = {
                                                             let siteEndpoint = localStorage.getItem('epiccms-site-endpoint');
 
                                                             //console.log("Load Template...",context.selectedTemplate);
-                                                            S3.getObject(context.selectedTemplate.value, localStorage.getItem('epiccms-data-bucket'), function (error, data) {
+                                                            S3.getObject(context.selectedTemplate, localStorage.getItem('epiccms-data-bucket'), function (error, data) {
                                                                 if (!error) {
                                                                     if(data) {
                                                                         //console.log("Template Received");
@@ -552,10 +560,45 @@ module.exports = {
                                                 }
                                             });
                                         }else if(viewModel.currentView === "template"){
+                                            let templateText = Editor.getText();
                                             renameTemplate(newKey, function (needed, error/*, data*/) {
                                                 if (!needed || !error) {
                                                     save(newKey, function (needed, error/*, data*/) {
                                                         if (!needed || !error) {
+                                                            viewModel.siteFiles.map(function (file) {
+                                                                if(file && file.ContentType === CONTENT_TYPE){
+                                                                    if(file.Metadata){
+                                                                        if(file.Metadata.template){
+                                                                            if(file.Metadata.template === newKey) {
+                                                                                S3.getObject(file.Key, localStorage.getItem('epiccms-data-bucket'), function (err, data) {
+                                                                                    if (!err && data) {
+                                                                                        //console.log(err, data);
+                                                                                        let title = "";
+                                                                                        if (data.Metadata && data.Metadata.title) {
+                                                                                            title = data.Metadata.title;
+                                                                                        }
+
+                                                                                        let siteBucket = localStorage.getItem('epiccms-site-bucket');
+                                                                                        let siteEndpoint = localStorage.getItem('epiccms-site-endpoint');
+
+                                                                                        Entry.upsert(file.Key, title, data.Body.toString(), siteBucket, siteEndpoint, Handlebars.compile(templateText), function (error/*, data*/) {
+                                                                                            if (!error) {
+                                                                                                console.log("Generated New HTML",file.Key);
+                                                                                            } else {
+                                                                                                console.error(error);
+                                                                                            }
+                                                                                        });
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        }else{
+                                                                            console.error("No Template Metadata for file",file);
+                                                                        }
+                                                                    }else{
+                                                                        console.error("No Metadata for file",file);
+                                                                    }
+                                                                }
+                                                            });
                                                             //console.log("Data saved!");
                                                         }else if(error){
                                                             console.error(error);
