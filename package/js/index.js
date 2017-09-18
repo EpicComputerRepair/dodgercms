@@ -53,6 +53,7 @@ function initRoutes() {
 
         m.route(document.body, "/", {
             "/": Nav.Home,
+            "/template": Nav.Template,
             "/editor": Nav.Editor,
             "/login":Login,
             "/dashboard": {

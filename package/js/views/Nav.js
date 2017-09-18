@@ -1,6 +1,7 @@
 'use strict';
 
 const Home = require("./Home");
+const Template = require("./Template");
 const Editor = require("./Editor");
 const View = require("./components/View");
 const UserPanel = require("./components/UserPanel");
@@ -24,6 +25,7 @@ module.exports = {
         view: function view(){
             Menu[0].active = true;
             Menu[1].active = false;
+            Menu[2].active = false;
             return createView(Home);
         }
     },
@@ -31,7 +33,16 @@ module.exports = {
         view: function view(){
             Menu[0].active = false;
             Menu[1].active = true;
+            Menu[2].active = false;
             return createView(Editor);
+        }
+    },
+    Template: {
+        view: function view(){
+            Menu[0].active = false;
+            Menu[1].active = false;
+            Menu[2].active = true;
+            return createView(Template);
         }
     }
 };

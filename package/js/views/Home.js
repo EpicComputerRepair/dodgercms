@@ -38,12 +38,13 @@ module.exports = {
                                 m("ul", m("li", m("i", "Pull requests should be made against this branch")))
                             )
                         ),
-                        m("h1", m("i", {class: "fa fa-fw fa-cog margin-right"}), "No Maintenance"),
-                        m("p", "No software to update or hardware to maintain, ", m("a",{href: "https://aws.amazon.com/s3/"},"AWS S3")," provides storage and hosting."),
                         m("h1", m("i", {class: "fa fa-fw fa-edit margin-right"}), "Powerful Editor"),
-                        m("p", m("a", {href: "/editor", oncreate: m.route.link}, "markdown editor")," Our editor "),
-                        m("h1", m("i", {class: "fa fa-fw fa-file-code-o margin-right"}), "Developer Friendly"),
-                        m("p", "HTML ", m("a", {href: "http://handlebarsjs.com/"}, "Handlebars"), " templates for creating fully customizable sites.")
+                        m("ul",
+                            m("li", m("a", {href: "/editor", oncreate: m.route.link}, "Markdown")," for content, supports HTML"),
+                            m("li", m("a", {href: "/template", oncreate: m.route.link}, "Handlebars")," for templates, full control over how content is displayed")
+                        ),
+                        m("h1", m("i", {class: "fa fa-fw fa-cog margin-right"}), "No Maintenance"),
+                        m("p", "No software to update or hardware to maintain, ", m("a",{href: "https://aws.amazon.com/s3/"},"AWS S3")," provides storage and hosting.")
                     )
                 )
             ])

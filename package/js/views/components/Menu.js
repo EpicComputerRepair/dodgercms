@@ -14,6 +14,12 @@ module.exports = [
         active: false
     },
     {
+        icon: "fa fa-file-code-o fa-fw fa-lg",
+        name: "Template",
+        href: "/template",
+        active: false
+    },
+    {
         icon: "fa fa-key fa-fw fa-lg",
         name: "Login",
         href: "/login",

@@ -342,6 +342,11 @@ module.exports = {
     view: function() {
         return [
             m("div", {class: "well"}, [
+                m("div", {class: "alert alert-info"}, [
+                    m("i", {class: "fa fa-fw fa-info margin-right"}),
+                    "Learn more about ",
+                    m("a", {href: "https://en.wikipedia.org/wiki/Markdown"}, "markdown")
+                ]),
                 m(Editor, {text: sampleText, mode: "gfm"}),
                 m("h3", "Flowchart support"),
                 m("p", m("i","TODO implement into markdown")),
