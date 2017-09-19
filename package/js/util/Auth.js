@@ -40,8 +40,8 @@ var getCredentials = function(allOrNothing) {
  * @param {String} location The data center the bucket resided in
  * @return {String}
  */
-var getEndpoint = function(protocol, bucket, location) {
-    return protocol + bucket + '.s3-website-' + location + '.amazonaws.com/';
+var getEndpoint = function(protocol, bucket) {
+    return protocol + bucket +'/';
 };
 
 /**
@@ -199,7 +199,7 @@ function login(params, callback) {
                                     }
 
                                     // The endpoint is needed for the templates
-                                    var endpoint = getEndpoint('http://', params.siteBucket, params.region);
+                                    var endpoint = getEndpoint('https://', params.siteBucket);
 
                                     try {
                                         //When running from file:///

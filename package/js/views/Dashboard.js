@@ -184,12 +184,12 @@ function save(key,callback) {
 }
 
 function renameDoc(key, callback) {
-    if(key !== viewModel.editor.originalKey){
+    if(key !== viewModel.editor.originalKey && viewModel.editor.originalKey !== ""){
         // The slug needs to be between 1 and 32 characters
         if (!/^([a-zA-Z0-9-_]){1,32}$/.test(key.substring(key.lastIndexOf("/")+1))) {
             callback(true,'The url slug must be at most 32 characters, and can only contain letters, numbers, dashes, underscores.');
         }
-        S3.entry.rename(viewModel.editor.originalKey, key, localStorage.getItem('epiccms-data-bucket'), localStorage.getItem('epiccms-site-bucket'), function(err, data) {
+        Entry.rename(viewModel.editor.originalKey, key, localStorage.getItem('epiccms-data-bucket'), localStorage.getItem('epiccms-site-bucket'), function(err, data) {
             if (err) {
                 callback(true,err);
             } else {
