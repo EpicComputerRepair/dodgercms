@@ -1,6 +1,6 @@
 'use strict';
 
-Raven.config('https://a161988fe3574441832441831d7d0a5a@sentry.io/212000').install();
+Raven.config('https://a1d11413ec8e40a28c68e5a26ecf6e98@sentry.io/211999').install();
 
 require("../../build/css/index.css");
 
