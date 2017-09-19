@@ -48,6 +48,24 @@ Handlebars.registerHelper('raw-helper', function(options) {
     return options.fn();
 });
 
+function updateIframe(content){
+    let iframe = document.getElementById('preview');
+
+    let iframedoc = iframe.document;
+    if (iframe.contentDocument) {
+        iframedoc = iframe.contentDocument;
+    }else if (iframe.contentWindow) {
+        iframedoc = iframe.contentWindow.document;
+    }
+
+    if (iframedoc){
+        // Put the content in the iframe
+        iframedoc.open();
+        iframedoc.writeln(content);
+        iframedoc.close();
+    }
+}
+
 module.exports = {
     setText: function (newText,ignore) {
         if(setLastText !== newText) {
@@ -92,9 +110,8 @@ module.exports = {
                 endpoint: localStorage.getItem('epiccms-site-endpoint'),
                 dataKey: '.epiccms/data.json'
             });
-            //Doesn't work well with content change
-            //display = m("iframe", {style: {width: "100%", height: "100%", border: "none"}, src: "data:text/html;charset=utf-8," + encodeURI(content)});
-            display = m.trust("<iframe style=\"width: 100%; height: 100%; border: none\" src=\"data:text/html;charset=utf-8,"+encodeURI(content)+"\"></iframe>");
+            display = m("iframe", {id: "preview", style: {width: "100%", height: "100%", border: "none"}, oncreate: function(){updateIframe(content);}, onupdate: function(){updateIframe(content);}});
+            //display = m.trust("<iframe style=\"width: 100%; height: 100%; border: none\" src=\"data:text/html;charset=utf-8,"+encodeURI(content)+"\"></iframe>");
         }
         return [
             m("div", {

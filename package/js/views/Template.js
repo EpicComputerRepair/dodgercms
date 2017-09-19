@@ -13,8 +13,8 @@ var sampleText = "<!DOCTYPE html>\n" +
     "  \n" +
     "  <meta name=\"description\" content=\"{{description}}\">\n" +
     "\n" +
-    "  <link rel=\"stylesheet\" href=\"http://yui.yahooapis.com/pure/0.6.0/pure-min.css\">\n" +
-    "  <link rel=\"stylesheet\" href=\"http://yui.yahooapis.com/pure/0.6.0/grids-responsive-min.css\">\n" +
+    "  <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/pure-min.css\">\n" +
+    "  <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-min.css\">\n" +
     "  <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/styles/github.min.css\">\n" +
     "\n" +
     "  <script src=\"https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/highlight.min.js\"></script>\n" +
