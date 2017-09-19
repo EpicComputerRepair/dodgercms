@@ -110,7 +110,7 @@ module.exports = {
                 endpoint: localStorage.getItem('epiccms-site-endpoint'),
                 dataKey: '.epiccms/data.json'
             });
-            display = m("iframe", {id: "preview", style: {width: "100%", height: "100%", border: "none"}, oncreate: function(){updateIframe(content);}, onupdate: function(){updateIframe(content);}});
+            display = m("iframe", {id: "preview", src: "about:blank", style: {width: "100%", height: "100%", border: "none"}, oncreate: function(){updateIframe(content);}, onupdate: function(){updateIframe(content);}});
             //display = m.trust("<iframe style=\"width: 100%; height: 100%; border: none\" src=\"data:text/html;charset=utf-8,"+encodeURI(content)+"\"></iframe>");
         }
         return [
