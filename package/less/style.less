@@ -1,0 +1,51 @@
+// variables
+@import "createFonts.less";
+@import "img.less";
+@import "icons.less";
+@import "colors.less";
+@import "variables.less";
+@import "views/imports.less";
+
+@import "../../bowerBuild/less/katex.less";
+@import "../../bowerBuild/less/choices.less";
+@import "../../bowerBuild/less/bootstrap/bootstrap.less";
+@import "../../bowerBuild/less/font-awesome/font-awesome.less";
+
+body, html {
+  padding: 0px;
+  height: 100%;
+  margin: 0px;
+}
+
+body {
+  background: url(@img-mountain_jpg) repeat center center fixed;
+  background-size: cover;
+}
+
+hr{
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.metaData{
+  display: none;
+}
+
+.margin-right {
+  margin-right: 5px;
+}
+
+.logo :hover,
+.logo :focus {
+  text-decoration: none;
+}
+.logo {
+  text-align: center;
+  text-shadow: 1px 3px 5px rgba(0, 0, 0, 0.5);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased !important;
+  opacity: 0.8;
+  margin: 10px 0px 0px 0px;
+  font-size: 32px;
+  font-family: 'minotaur';
+}
