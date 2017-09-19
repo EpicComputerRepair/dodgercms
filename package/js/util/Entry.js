@@ -67,7 +67,7 @@ function rename(source, target, dataBucket, siteBucket, callback) {
 function upsert(key, title, content, bucket, endpoint, template, callback) {
     async.waterfall([
             function(waterfallCb) {
-                var options = {
+                let options = {
                     renderer: new marked.Renderer(),
                     gfm: true,
                     tables: true,
@@ -92,9 +92,9 @@ function upsert(key, title, content, bucket, endpoint, template, callback) {
             },
             // Process the templates
             function(body, waterfallCb) {
-                var modified = new Date();
+                let modified = new Date();
 
-                var context = {
+                let context = {
                     key: key,
                     title: title,
                     modified: modified.toLocaleString(),
@@ -104,13 +104,11 @@ function upsert(key, title, content, bucket, endpoint, template, callback) {
                     dataKey: DATA_KEY
                 };
 
-                var html = template(context);
-
-                waterfallCb(null, html);
+                waterfallCb(null, template(context));
             },
             // Upload the key to S3
             function(html, waterfallCb) {
-                var params = {
+                let params = {
                     Bucket: bucket,
                     Key: key,
                     Body: html,
@@ -162,8 +160,8 @@ function menu(bucket, endpoint, callback) {
             },
             // Filter unwanted files
             function(data, waterfallCb) {
-                var contents = data.Contents;
-                for (var i = contents.length -1; i >= 0 ; i-=1) {
+                let contents = data.Contents;
+                for (let i = contents.length -1; i >= 0 ; i-=1) {
                     // Keys beginning with a period are treated as hidden or system files
                     if (contents[i].Key.substr(0, 1) === '.') {
                         contents.splice(i, 1);
@@ -174,7 +172,7 @@ function menu(bucket, endpoint, callback) {
             },
             // Takes the files from the s3 bucket
             function(data, waterfallCb) {
-                var keys = [];
+                let keys = [];
 
                 // Get each object in parallel
                 async.each(data, function(object, cb) {
@@ -200,22 +198,22 @@ function menu(bucket, endpoint, callback) {
             },
             // Takes an array of keys and builds a tree
             function(keys, waterfallCb) {
-                var tree = [];
+                let tree = [];
 
                 // A reference to the parentScope is needed so we can add the index if needed
                 function buildFromSegments(scope, parentScope, keyParts, pathSegments, isFolder, keyLabel) {
                     // Remove the first segment from the path
-                    var current = pathSegments.shift();
+                    let current = pathSegments.shift();
 
                     // Keep track of the key, which is the link to the entry
                     keyParts.push(current);
 
                     // The label defaults to the current part if no other title or folder label is added
-                    var label = current;
+                    let label = current;
 
                     // Attempts to find a path segment in the current scope
                     function findInScope(scope, find) {
-                        for (var i = 0; i < scope.length; i++) {
+                        for (let i = 0; i < scope.length; i++) {
                             if (scope[i].part === find) {
                                 return scope[i];
                             }
@@ -223,11 +221,11 @@ function menu(bucket, endpoint, callback) {
                     }
 
                     // See if that segment already exists in the current scope
-                    var found = findInScope(scope, current);
+                    let found = findInScope(scope, current);
 
                     // If we did not find a match, create the new object for this path segment
                     if (!found) {
-                        var key = keyParts.join('/');
+                        let key = keyParts.join('/');
 
                         // Check if the last part in the path segment
                         if (!pathSegments.length) {
@@ -276,14 +274,14 @@ function menu(bucket, endpoint, callback) {
                 }
 
                 keys.forEach(function(object) {
-                    var key = object.Key;
+                    let key = object.Key;
 
                     // If it ends with a slash it's a directory
-                    var isFolder = (key.substr(-1) === '/') ? true : false;
-                    var label = (isFolder) ? object.Metadata.label : object.Metadata.title;
+                    let isFolder = (key.substr(-1) === '/') ? true : false;
+                    let label = (isFolder) ? object.Metadata.label : object.Metadata.title;
 
                     // Remove the last slash if is exists so there is no empty string in the split array
-                    var parts = object.Key.replace(/\/\s*$/, '').split('/');
+                    let parts = object.Key.replace(/\/\s*$/, '').split('/');
 
                     buildFromSegments(tree, null, [], parts, isFolder, label);
                 });
@@ -292,7 +290,7 @@ function menu(bucket, endpoint, callback) {
             },
             // Upload the nav to the bucket
             function(data, waterfallCb) {
-                var params = {
+                let params = {
                     Bucket: bucket,
                     Key: DATA_KEY,
                     Body: JSON.stringify(data),

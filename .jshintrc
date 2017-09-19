@@ -28,6 +28,7 @@
     "CodeMirror": false,
     "marked": false,
     "Handlebars": false,
-    "hljs": false
+    "hljs": false,
+    "Cache": false
   }
 }

@@ -1,5 +1,6 @@
 'use strict';
 
+const cache = require("./Cache");
 const ENCODING_TYPE = 'url';
 const API_VERSION = '2011-06-15';
 
@@ -78,27 +79,34 @@ function deleteObject(key, bucket, callback) {
  * @param {Function} callback Callback function
  */
 function listObjects(prefix, bucket, callback) {
-    // The prefix is an optional argument
-    if (arguments.length === 2) {
-        callback = bucket;
-        bucket = prefix;
-        prefix = '';
-    }
 
-    var params = {
-        Bucket: bucket,
-        EncodingType: ENCODING_TYPE,
-        MaxKeys: 1000,
-        Prefix: prefix
-    };
-
-    s3.listObjects(params, function(err, data) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(null, data);
+    let cached = cache.get({method: "listObjects", prefix: prefix, bucket: bucket});
+    if(cached){
+        callback(null,cached);
+    } else {
+        // The prefix is an optional argument
+        if (arguments.length === 2) {
+            callback = bucket;
+            bucket = prefix;
+            prefix = '';
         }
-    });
+
+        let params = {
+            Bucket: bucket,
+            EncodingType: ENCODING_TYPE,
+            MaxKeys: 1000,
+            Prefix: prefix
+        };
+
+        s3.listObjects(params, function (err, data) {
+            if (err) {
+                callback(err);
+            } else {
+                cache.put({method: "listObjects", prefix: prefix, bucket: bucket},data);
+                callback(null, data);
+            }
+        });
+    }
 }
 
 /**
@@ -110,7 +118,7 @@ function listObjects(prefix, bucket, callback) {
  * @param {Function} callback Callback function
  */
 function renameObject(source, target, bucket, callback) {
-    var params = {
+    let params = {
         Bucket: bucket,
         MetadataDirective: 'COPY',
         // Copy Source must mention the source bucket and key: sourcebucket/sourcekey
@@ -152,18 +160,24 @@ function upload(params, callback) {
  * @param {Function} callback Callback function
  */
 function getObject(key, bucket, callback) {
-    var params = {
-        Bucket: bucket,
-        Key: key
-    };
+    let cached = cache.get({method: "getObject", key: key, bucket: bucket});
+    if(cached){
+        callback(null,cached);
+    } else {
+        let params = {
+            Bucket: bucket,
+            Key: key
+        };
 
-    s3.getObject(params, function(err, data) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(null, data);
-        }
-    });
+        s3.getObject(params, function (err, data) {
+            if (err) {
+                callback(err);
+            } else {
+                cache.put({method: "getObject", key: key, bucket: bucket},data);
+                callback(null, data);
+            }
+        });
+    }
 }
 
 /**
@@ -174,18 +188,24 @@ function getObject(key, bucket, callback) {
  * @param {Function} callback Callback function
  */
 function headObject(key, bucket, callback) {
-    var params = {
-        Bucket: bucket,
-        Key: key
-    };
+    let cached = cache.get({method: "headObject", key: key, bucket: bucket});
+    if(cached){
+        callback(null,cached);
+    } else {
+        let params = {
+            Bucket: bucket,
+            Key: key
+        };
 
-    s3.headObject(params, function(err, data) {
-        if (err) {
-            callback(err);
-        } else {
-            callback(null, data);
-        }
-    });
+        s3.headObject(params, function (err, data) {
+            if (err) {
+                callback(err);
+            } else {
+                cache.put({method: "headObject", key: key, bucket: bucket},data);
+                callback(null, data);
+            }
+        });
+    }
 }
 
 /**
@@ -196,7 +216,7 @@ function headObject(key, bucket, callback) {
  * @param {Function} callback Callback function
  */
 function putObject(key, bucket, callback) {
-    var params;
+    let params;
 
     // If there are two arguments and the first is an object we we given the params directly
     if (arguments.length === 2 && typeof key === 'object') {
@@ -227,7 +247,7 @@ function putObject(key, bucket, callback) {
  * @param {Function} callback Callback function
  */
 function copyObject(source, target, bucket, callback) {
-    var params = {
+    let params = {
         Bucket: bucket,
         MetadataDirective: 'COPY',
         // Copy Source must mention the source bucket and key: sourcebucket/sourcekey
@@ -257,24 +277,24 @@ function renameObjects(source, target, bucket, callback) {
     // If the key is a folder we want to copy each child
     if (source.substr(-1) === '/') {
         // Split the file path into an array of parts
-        var parts = source.replace(/\/\s*$/, '').split('/');
+        let parts = source.replace(/\/\s*$/, '').split('/');
 
         // Remove the last part off the file path
         parts.splice(-1, 1, target);
 
         // The key to replace the old directory
-        var targetPrefix = parts.join('/') + '/';
+        let targetPrefix = parts.join('/') + '/';
 
         listObjects(source, bucket, function(err, data) {
             if (err) {
                 callback(err);
             } else {
-                var contents = data.Contents;
+                let contents = data.Contents;
 
                 // Copy each object in parallel
                 async.each(contents, function(object, cb) {
                     // Replace the source with the target
-                    var key = targetPrefix + object.Key.substr(source.length);
+                    let key = targetPrefix + object.Key.substr(source.length);
 
                     copyObject(object.Key, key, bucket, cb);
                 }, function(err) {
@@ -307,7 +327,7 @@ function deleteObjects(key, bucket, callback) {
             if (err) {
                 callback(err);
             } else {
-                var contents = data.Contents;
+                let contents = data.Contents;
                 // Delete each object in parallel
                 async.each(contents, function(object, cb) {
                     deleteObject(object.Key, bucket, cb);
@@ -337,31 +357,37 @@ function deleteObjects(key, bucket, callback) {
  * @param {Function} callback Callback function
  */
 function headObjects(contents, bucket, callback) {
-    var keys = [];
+    let cached = cache.get({method: "headObjects", contents: contents, bucket: bucket});
+    if(cached){
+        callback(null,cached);
+    } else {
+        let keys = [];
 
-    // Get each object in parallel
-    async.each(contents, function(object, cb) {
-            s3.headObject({
-                Bucket: bucket,
-                Key: object.Key
-            }, function(err, data) {
+        // Get each object in parallel
+        async.each(contents, function (object, cb) {
+                s3.headObject({
+                    Bucket: bucket,
+                    Key: object.Key
+                }, function (err, data) {
+                    if (err) {
+                        cb(err);
+                    } else {
+                        // Add the key attribute
+                        data.Key = object.Key;
+                        keys.push(data);
+                        cb(null);
+                    }
+                });
+            },
+            function (err) {
                 if (err) {
-                    cb(err);
+                    callback(err);
                 } else {
-                    // Add the key attribute
-                    data.Key = object.Key;
-                    keys.push(data);
-                    cb(null);
+                    cache.put({method: "headObjects", contents: contents, bucket: bucket},keys);
+                    callback(null, keys);
                 }
             });
-        },
-        function(err) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null, keys);
-            }
-        });
+    }
 }
 
 module.exports = {

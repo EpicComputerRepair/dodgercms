@@ -298,6 +298,7 @@ module.exports = {
         // Setup connection to S3
         s3init(false);
         if(viewModel.siteFiles === null) {
+            console.log("Rebuild tree",viewModel.siteFiles);
             getDir(function (error, data) {
                 if (!error) {
                     viewModel.siteFiles = data.filter(function (value) {
