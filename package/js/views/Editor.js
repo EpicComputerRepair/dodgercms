@@ -339,7 +339,14 @@ var sampleText = "Live Epic CMS Markdown Editor\n" +
     "\n";
 
 module.exports = {
+    setSampleText: function (text) {
+        sampleText = text;
+    },
+    getSampleText: function () {
+        return sampleText;
+    },
     view: function() {
+        Editor.setOnchange(this.setSampleText);
         return [
             m("div", {class: "well"}, [
                 m("div", {class: "alert alert-info"}, [

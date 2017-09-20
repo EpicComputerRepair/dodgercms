@@ -1,6 +1,7 @@
 'use strict';
 
 const Editor = require("./components/Editor");
+const EditorView = require("./Editor");
 
 var sampleText = "<!DOCTYPE html>\n" +
     "<html lang=\"en\">\n" +
@@ -626,7 +627,11 @@ var sampleText = "<!DOCTYPE html>\n" +
     "</html>";
 
 module.exports = {
+    setSampleText: function (text) {
+        sampleText = text;
+    },
     view: function() {
+        Editor.setOnchange(this.setSampleText);
         return [
             m("div", {class: "well"}, [
                 m("div", {class: "alert alert-info"}, [
@@ -635,7 +640,7 @@ module.exports = {
                     m("a", {href: "http://handlebarsjs.com/"}, "Handlebars"),
                     " for integrating markdown content. HTML, JS, and CSS are supported. Just like writing an normal website."
                 ]),
-                m(Editor, {text: sampleText, mode: "htmlmixed"})
+                m(Editor, {text: sampleText, mode: "htmlmixed", templateText: EditorView.getSampleText()})
             ])
         ];
     }

@@ -61,82 +61,28 @@ function rename(source, target, dataBucket, siteBucket, callback) {
  * @param {String} title The title of the entry
  * @param {String} content The markdown content
  * @param {String} bucket The front end bucket
- * @param {String} endpoint The endpoint for the bucket
  * @param {Function} callback Callback function
  */
-function upsert(key, title, content, bucket, endpoint, template, callback) {
-    async.waterfall([
-            function(waterfallCb) {
-                let options = {
-                    renderer: new marked.Renderer(),
-                    gfm: true,
-                    tables: true,
-                    breaks: false,
-                    pedantic: false,
-                    sanitize: false,
-                    smartLists: true,
-                    smartypants: false,
-                    highlight: function(code) {
-                        return hljs.highlightAuto(code).value;
-                    }
-                };
+function upsert(key, title, content, bucket, callback) {
+    let params = {
+        Bucket: bucket,
+        Key: key,
+        Body: content,
+        ContentType: 'text/html; charset=UTF-8',
+        Expires: new Date(Date.now() + 10),
+        CacheControl: 'public, max-age=10, must-revalidate',
+        Metadata: {
+            title: title
+        }
+    };
 
-                // Convert the content to HTML
-                marked(content, options, function(err, data) {
-                    if (err) {
-                        waterfallCb(err);
-                    } else {
-                        waterfallCb(null, data);
-                    }
-                });
-            },
-            // Process the templates
-            function(body, waterfallCb) {
-                let modified = new Date();
-
-                let context = {
-                    key: key,
-                    title: title,
-                    modified: modified.toLocaleString(),
-                    body: body,
-                    bucket: bucket,
-                    endpoint: endpoint,
-                    dataKey: DATA_KEY
-                };
-
-                waterfallCb(null, template(context));
-            },
-            // Upload the key to S3
-            function(html, waterfallCb) {
-                let params = {
-                    Bucket: bucket,
-                    Key: key,
-                    Body: html,
-                    ContentType: 'text/html; charset=UTF-8',
-                    Expires: 0,
-                    CacheControl: 'public, max-age=0, no-cache',
-                    Metadata: {
-                        title: title
-                    }
-                };
-
-                S3.upload(params, function(err/*, data*/) {
-                    if (err) {
-                        waterfallCb(err);
-                    } else {
-                        waterfallCb(null);
-                    }
-                });
-            }
-        ],
-        // Callback
-        function(err, result) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null, result);
-            }
-        });
+    S3.upload(params, function(err/*, data*/) {
+        if (err) {
+            callback(err);
+        } else {
+            callback(null);
+        }
+    });
 }
 
 /**
@@ -295,8 +241,8 @@ function menu(bucket, endpoint, callback) {
                     Key: DATA_KEY,
                     Body: JSON.stringify(data),
                     ContentType: 'application/json; charset=UTF-8',
-                    Expires: 0,
-                    CacheControl: 'public, max-age=0, no-cache'
+                    Expires: new Date(Date.now() + 10),
+                    CacheControl: 'public, max-age=10, must-revalidate'
                 };
                 S3.upload(params, function(err, data) {
                     if (err) {

@@ -1,8 +1,7 @@
 'use strict';
 
 let codeMirror = null;
-let text = "", mode = "", setLastText = "";
-
+let text = "", mode = "", setLastText = "", textFunction = null;
 
 marked.setOptions({
     renderer: new marked.Renderer(),
@@ -12,7 +11,10 @@ marked.setOptions({
     pedantic: false,
     sanitize: false,
     smartLists: true,
-    smartypants: false
+    smartypants: false,
+    highlight: function(code) {
+        return hljs.highlightAuto(code).value;
+    }
 });
 
 let redrawTemplate = _.debounce(function (){
@@ -30,6 +32,9 @@ function getCodeMirror(element,newText){
     codeMirror.setOption("theme", "mdn-like");
     codeMirror.on("change", function(codeMirror) {
         text = codeMirror.getValue();
+        if(textFunction !== null){
+            textFunction(text);
+        }
         if(codeMirror.getOption("mode") === "htmlmixed"){
             redrawTemplate();
         }else{
@@ -91,6 +96,12 @@ module.exports = {
             doc.replaceRange(text, doc.getCursor());
         }
     },
+    setOnchange: function (txtFunction) {
+        textFunction = txtFunction;
+    },
+    processMarked: function (text) {
+      return marked(text);
+    },
     view: function view(vnode) {
         if(vnode.attrs.text){
             this.setText(vnode.attrs.text,true);
@@ -104,9 +115,9 @@ module.exports = {
         }else{
             let content = Handlebars.compile(text)({
                 key: "Key",
-                title: "Title Here",
+                title: vnode.attrs.templateTitle ? vnode.attrs.templateTitle : "Title Here",
                 modified: new Date().toLocaleString(),
-                body: "Content Here",
+                body: vnode.attrs.templateText ? marked(vnode.attrs.templateText) : "Content Here",
                 endpoint: localStorage.getItem('epiccms-site-endpoint'),
                 dataKey: '.epiccms/data.json'
             });
