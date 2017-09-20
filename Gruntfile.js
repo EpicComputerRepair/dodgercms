@@ -14,7 +14,7 @@ module.exports = function (grunt) {
         access: 'public-read',
         params:{
             ContentEncoding: "gzip",
-            CacheControl: "max-age=3600, must-revalidate",
+            CacheControl: "public, max-age=3600, must-revalidate",
             Expires: new Date(Date.now() + 3600)
         }
     };
@@ -103,6 +103,12 @@ module.exports = function (grunt) {
                     'build/index.html': 'package/index.html',     // 'destination': 'source'
                     'build/404.html': 'package/404.html'
                 }
+            }
+        },
+        download: {
+            htmlmin: {
+                src: ['https://raw.githubusercontent.com/kangax/html-minifier/gh-pages/dist/htmlminifier.min.js'],
+                dest: './bowerBuild/js/'
             }
         },
         aws_s3: {
@@ -815,7 +821,7 @@ module.exports = function (grunt) {
     grunt.registerTask('default', ['local']);
 
     grunt.registerTask('cleanBower', ['clean:dist']);
-    grunt.registerTask('bowerSetup', ['mkdir', 'bower', 'copy:main', 'concat:choices', 'concat:katex', 'concat:snap', 'concat:fontloader', 'concat:codeMirror', 'clean:bowerBuildUnneeded', 'copy:mithril', 'replace:fontAwesomeInline', 'replace:bootstrapInline', 'replace:choicesInline', 'replace:katexInline', 'replace:bootstrap1', 'replace:bootstrap2', 'replace:bootstrap3', 'replace:bootstrap4', 'rename:fixDep']);
+    grunt.registerTask('bowerSetup', ['mkdir', 'bower', 'download:htmlmin', 'copy:main', 'concat:choices', 'concat:katex', 'concat:snap', 'concat:fontloader', 'concat:codeMirror', 'clean:bowerBuildUnneeded', 'copy:mithril', 'replace:fontAwesomeInline', 'replace:bootstrapInline', 'replace:choicesInline', 'replace:katexInline', 'replace:bootstrap1', 'replace:bootstrap2', 'replace:bootstrap3', 'replace:bootstrap4', 'rename:fixDep']);
     grunt.registerTask('bowerBuild', ['bowerSetup','bowerFlattenCompress']);
     grunt.registerTask('bowerFlattenCompress', ['clean:dev', 'uglify:depends', 'compress']);
     grunt.registerTask('bowerDeploy', ['aws_s3:depends']);

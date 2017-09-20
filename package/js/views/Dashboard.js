@@ -9,6 +9,23 @@ const UserPanel = require("./components/UserPanel");
 const CONTENT_TYPE = 'text/plain; charset=UTF-8';
 const TEMPLATE_TYPE = 'text/html; charset=UTF-8';
 
+let minify = (function() {
+    let minify = require('html-minifier').minify;
+    return function(value, options, callback) {
+        options.log = function(message) {
+            console.log(message);
+        };
+        let minified;
+        try {
+            minified = minify(value, options);
+        }
+        catch (err) {
+            console.error(err);
+        }
+        callback(minified);
+    };
+})();
+
 /**
  * Sets up the connection to S3.
  *
@@ -537,15 +554,32 @@ module.exports = {
                                                                 if (!error) {
                                                                     if(data) {
                                                                         //console.log("Template Received");
-                                                                        Entry.upsert(newKey, context.title, Editor.getText(), siteBucket, siteEndpoint, Handlebars.compile(data.Body.toString()), function (error/*, data*/) {
-                                                                            if (!error) {
-                                                                                //console.log("Generated New HTML");
-                                                                                Entry.menu(siteBucket, siteEndpoint, function () {
-                                                                                    //console.log("Generated New Menu");
-                                                                                });
-                                                                            } else {
-                                                                                console.error(error);
-                                                                            }
+                                                                        minify(Handlebars.compile(data.Body.toString())({
+                                                                            key: newKey,
+                                                                            title: context.title,
+                                                                            modified: new Date().toLocaleString(),
+                                                                            body: Editor.processMarked(Editor.getText()),
+                                                                            bucket: siteBucket,
+                                                                            endpoint: siteEndpoint,
+                                                                            dataKey: '.epiccms/data.json'
+                                                                        }), {
+                                                                            removeComments: true,
+                                                                            collapseWhitespace: true,
+                                                                            collapseBooleanAttributes: true,
+                                                                            minifyCSS: true,
+                                                                            minifyJS: true
+                                                                        }, function (minified) {
+                                                                            minified = minified.replace(/(?:\r\n|\r|\n)/g, '');
+                                                                            Entry.upsert(newKey, context.title, minified, siteBucket, function (error/*, data*/) {
+                                                                                if (!error) {
+                                                                                    //console.log("Generated New HTML");
+                                                                                    Entry.menu(siteBucket, siteEndpoint, function () {
+                                                                                        //console.log("Generated New Menu");
+                                                                                    });
+                                                                                } else {
+                                                                                    console.error(error);
+                                                                                }
+                                                                            });
                                                                         });
                                                                     }
                                                                 }else{
@@ -561,7 +595,6 @@ module.exports = {
                                                 }
                                             });
                                         }else if(viewModel.currentView === "template"){
-                                            let templateText = Editor.getText();
                                             renameTemplate(newKey, function (needed, error/*, data*/) {
                                                 if (!needed || !error) {
                                                     save(newKey, function (needed, error/*, data*/) {
@@ -582,12 +615,29 @@ module.exports = {
                                                                                         let siteBucket = localStorage.getItem('epiccms-site-bucket');
                                                                                         let siteEndpoint = localStorage.getItem('epiccms-site-endpoint');
 
-                                                                                        Entry.upsert(file.Key, title, data.Body.toString(), siteBucket, siteEndpoint, Handlebars.compile(templateText), function (error/*, data*/) {
-                                                                                            if (!error) {
-                                                                                                console.log("Generated New HTML",file.Key);
-                                                                                            } else {
-                                                                                                console.error(error);
-                                                                                            }
+                                                                                        minify(Handlebars.compile(Editor.getText())({
+                                                                                            key: file.Key,
+                                                                                            title: title,
+                                                                                            modified: new Date().toLocaleString(),
+                                                                                            body: Editor.processMarked(data.Body.toString()),
+                                                                                            bucket: siteBucket,
+                                                                                            endpoint: siteEndpoint,
+                                                                                            dataKey: '.epiccms/data.json'
+                                                                                        }), {
+                                                                                            removeComments: true,
+                                                                                            collapseWhitespace: true,
+                                                                                            collapseBooleanAttributes: true,
+                                                                                            minifyCSS: true,
+                                                                                            minifyJS: true
+                                                                                        }, function (minified) {
+                                                                                            minified = minified.replace(/(?:\r\n|\r|\n)/g, '');
+                                                                                            Entry.upsert(file.Key, title, minified, siteBucket, function (error/*, data*/) {
+                                                                                                if (!error) {
+                                                                                                    console.log("Generated New HTML",file.Key);
+                                                                                                } else {
+                                                                                                    console.error(error);
+                                                                                                }
+                                                                                            });
                                                                                         });
                                                                                     }
                                                                                 });

@@ -3,7 +3,6 @@
 let codeMirror = null;
 let text = "", mode = "", setLastText = "", textFunction = null;
 
-
 marked.setOptions({
     renderer: new marked.Renderer(),
     gfm: true,
@@ -12,7 +11,10 @@ marked.setOptions({
     pedantic: false,
     sanitize: false,
     smartLists: true,
-    smartypants: false
+    smartypants: false,
+    highlight: function(code) {
+        return hljs.highlightAuto(code).value;
+    }
 });
 
 let redrawTemplate = _.debounce(function (){
@@ -96,6 +98,9 @@ module.exports = {
     },
     setOnchange: function (txtFunction) {
         textFunction = txtFunction;
+    },
+    processMarked: function (text) {
+      return marked(text);
     },
     view: function view(vnode) {
         if(vnode.attrs.text){

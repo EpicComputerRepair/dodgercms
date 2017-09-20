@@ -9,6 +9,9 @@ module.exports = {
     node: {
         fs: "empty" // avoids error messages
     },
+    externals: {
+        'html-minifier': 'commonjs html-minifier'
+    },
     module: {
         loaders: [
             {
